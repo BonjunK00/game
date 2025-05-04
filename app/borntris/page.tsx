@@ -1,4 +1,4 @@
-export default function BlockFall() {
+export default function Borntris() {
   return (
       <main>
         <h1>About Page</h1>

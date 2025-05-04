@@ -1,31 +1,29 @@
-// app/layout.tsx
 import './globals.css';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Game Hub',
-  description: 'Play simple games!',
+  title: 'Game Playground',
+  description: 'Simple browser games with a modern vibe',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({children}: { children: React.ReactNode }) {
   return (
-      <html lang="en" className="dark">
-      <body className="min-h-screen bg-blue-50 text-blue-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
-      <header className="bg-blue-200 dark:bg-gray-800 shadow p-4">
-        <div className="max-w-4xl mx-auto flex justify-between">
-          <h1 className="text-xl font-bold">🎮 Game Hub</h1>
-          <Link href="/" className="text-blue-800 dark:text-blue-300 hover:underline text-sm">
-            Home
+      <html lang="en">
+      <body className="min-h-screen bg-[#F9FAFB] text-[#111827] font-sans antialiased">
+      <header className="border-b border-gray-200 bg-white">
+        <div className="max-w-screen-md mx-auto px-4 py-5 flex justify-between items-center">
+          <Link href="/"
+                className="text-xl font-bold tracking-tight text-[#FF6B00] hover:opacity-80 transition">
+            🕹️ Game Hub
           </Link>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {children}
-      </main>
+      <main className="max-w-screen-md mx-auto px-4 py-10">{children}</main>
 
-      <footer className="text-center text-sm text-blue-800 dark:text-gray-400 py-4 border-t border-blue-300 dark:border-gray-700">
-        © 2025 Game Hub
+      <footer className="text-center text-xs text-gray-400 py-6">
+        © 2025 Game Hub — Created by Bonjun · <a href="https://github.com/BonjunK00"
+                                                 className="hover:underline">GitHub</a>
       </footer>
       </body>
       </html>
