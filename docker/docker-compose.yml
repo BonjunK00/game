@@ -1,0 +1,23 @@
+services:
+  game:
+    build:
+      context: ../
+      dockerfile: docker/game.dockerfile
+    restart: always
+    ports:
+      - "${GAME_PORT:-5009}:5009"
+    container_name: game
+    environment:
+      - NODE_OPTIONS="--inspect"
+      - PORT=${NEXT_PORT}
+    networks:
+      - app_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.game.rule=PathPrefix(`/game`)"
+      - "traefik.http.routers.game.entrypoints=web"
+      - "traefik.http.services.game.loadbalancer.server.port=5009"
+
+networks:
+  app_net:
+    external: true
