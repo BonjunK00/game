@@ -4,48 +4,73 @@ const TILE_SIZE = 30;
 const GRID_WIDTH = 10;
 const GRID_HEIGHT = 20;
 
-const TETROMINOES: number[][][] = [
-  // T
-  [
-    [0, 1, 0],
-    [1, 1, 1],
-  ],
-  // O
-  [
-    [1, 1],
-    [1, 1],
-  ],
-  // I
-  [
-    [1, 1, 1, 1],
-  ],
-  // L
-  [
-    [1, 0],
-    [1, 0],
-    [1, 1],
-  ],
-  // J
-  [
-    [0, 1],
-    [0, 1],
-    [1, 1],
-  ],
-  // S
-  [
-    [0, 1, 1],
-    [1, 1, 0],
-  ],
-  // Z
-  [
-    [1, 1, 0],
-    [0, 1, 1],
-  ],
+const TETROMINOES: {
+  name: 'T' | 'O' | 'I' | 'L' | 'J' | 'S' | 'Z';
+  shape: number[][];
+  color: number; // 16진수 색상값
+}[] = [
+  {
+    name: 'T',
+    shape: [
+      [0, 1, 0],
+      [1, 1, 1],
+    ],
+    color: 0xFF77AA,
+  },
+  {
+    name: 'O',
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+    color: 0xFFFF00,
+  },
+  {
+    name: 'I',
+    shape: [
+      [1, 1, 1, 1],
+    ],
+    color: 0x00FFFF,
+  },
+  {
+    name: 'L',
+    shape: [
+      [1, 0],
+      [1, 0],
+      [1, 1],
+    ],
+    color: 0xFF9900,
+  },
+  {
+    name: 'J',
+    shape: [
+      [0, 1],
+      [0, 1],
+      [1, 1],
+    ],
+    color: 0xFFA552,
+  },
+  {
+    name: 'S',
+    shape: [
+      [0, 1, 1],
+      [1, 1, 0],
+    ],
+    color: 0x00FF00,
+  },
+  {
+    name: 'Z',
+    shape: [
+      [1, 1, 0],
+      [0, 1, 1],
+    ],
+    color: 0xFF0000,
+  },
 ];
 
 export default class BorntrisScene extends Phaser.Scene {
   private field: number[][] = [];
-  private currentBlock: { shape: number[][]; x: number; y: number } | null = null;
+  private currentBlock: { shape: number[][]; x: number; y: number; color: number } | null = null;
   private blockGraphics: Phaser.GameObjects.Rectangle[] = [];
   private fixedBlockGraphics: Phaser.GameObjects.Rectangle[] = [];
 
@@ -129,7 +154,7 @@ export default class BorntrisScene extends Phaser.Scene {
   }
 
   spawnNewBlock() {
-    const shape = Phaser.Utils.Array.GetRandom(TETROMINOES); // 랜덤 선택
+    const {shape, color} = Phaser.Utils.Array.GetRandom(TETROMINOES); // 랜덤 선택
     const x = Math.floor((GRID_WIDTH - shape[0].length) / 2); // 중앙 정렬
     const y = 0
 
@@ -138,7 +163,7 @@ export default class BorntrisScene extends Phaser.Scene {
       return;
     }
 
-    this.currentBlock = {shape, x, y};
+    this.currentBlock = {shape, x, y, color};
     this.renderCurrentBlock();
   }
 
@@ -148,12 +173,12 @@ export default class BorntrisScene extends Phaser.Scene {
 
     if (!this.currentBlock) return;
 
-    const {shape, x: offsetX, y: offsetY} = this.currentBlock;
+    const {shape, x: offsetX, y: offsetY, color} = this.currentBlock;
 
     for (let y = 0; y < shape.length; y++) {
       for (let x = 0; x < shape[y].length; x++) {
         if (shape[y][x] === 1) {
-          const rect = this.drawTile(offsetX + x, offsetY + y, 0xff3b3b);
+          const rect = this.drawTile(offsetX + x, offsetY + y, color);
           this.blockGraphics.push(rect);
         }
       }
@@ -165,7 +190,7 @@ export default class BorntrisScene extends Phaser.Scene {
     const pixelY = y * TILE_SIZE + TILE_SIZE / 2;
 
     const rect = this.add.rectangle(pixelX, pixelY, TILE_SIZE, TILE_SIZE, color);
-    rect.setStrokeStyle(1, 0xffffff);
+    rect.setStrokeStyle(1, 0x111111);
     return rect;
   }
 
