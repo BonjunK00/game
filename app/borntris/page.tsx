@@ -2,7 +2,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 const BorntrisGame = dynamic(() => import('@/components/BorntrisGame'), {ssr: false});
 
@@ -11,6 +11,19 @@ export default function Borntris() {
   const [gameOver, setGameOver] = useState(false);
   const [paused, setPaused] = useState(false);
   const [restartSignal, setRestartSignal] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Escape') {
+        setPaused(true);
+      } else if (e.code === 'Enter') {
+        setPaused(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
       <main className="flex items-start justify-center bg-black pt-8 relative">
