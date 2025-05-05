@@ -15,8 +15,10 @@ export default function Borntris() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Escape') {
+        e.preventDefault();
         setPaused(true);
       } else if (e.code === 'Enter') {
+        e.preventDefault();
         setPaused(false);
       }
     };
