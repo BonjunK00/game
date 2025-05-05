@@ -56,6 +56,8 @@ export default class BorntrisScene extends Phaser.Scene {
   private isDropping: boolean = false;
   private spacePressed: boolean = false;
 
+  private dropEvent?: Phaser.Time.TimerEvent;
+
   constructor() {
     super('BorntrisScene');
   }
@@ -74,12 +76,7 @@ export default class BorntrisScene extends Phaser.Scene {
     this.createEmptyField();
     this.spawnNewBlock();
 
-    this.time.addEvent({
-      delay: 500,
-      loop: true,
-      callback: this.dropBlock,
-      callbackScope: this,
-    });
+    this.startDropLoop()
 
     this.input.keyboard?.on('keydown-LEFT', (event: KeyboardEvent) => {
       event.preventDefault();
@@ -116,6 +113,19 @@ export default class BorntrisScene extends Phaser.Scene {
 
   createEmptyField() {
     this.field = Array.from({length: GRID_HEIGHT}, () => Array(GRID_WIDTH).fill(0));
+  }
+
+  startDropLoop() {
+    if (this.dropEvent) {
+      this.dropEvent.remove(); // 기존 타이머 제거
+    }
+
+    this.dropEvent = this.time.addEvent({
+      delay: 500,
+      loop: true,
+      callback: this.dropBlock,
+      callbackScope: this,
+    });
   }
 
   spawnNewBlock() {
@@ -326,6 +336,7 @@ export default class BorntrisScene extends Phaser.Scene {
     if (!this.currentBlock || this.isDropping) return;
 
     this.isDropping = true;
+    this.dropEvent?.remove();
 
     const dropper = this.time.addEvent({
       delay: 15,
@@ -340,9 +351,14 @@ export default class BorntrisScene extends Phaser.Scene {
         const nextY = this.currentBlock.y + 1;
         if (this.isColliding(this.currentBlock.shape, this.currentBlock.x, nextY)) {
           this.fixCurrentBlock();
-          this.spawnNewBlock();
-          this.isDropping = false;
+
           dropper.remove();
+
+          this.time.delayedCall(200, () => {
+            this.spawnNewBlock();
+            this.startDropLoop()
+            this.isDropping = false;
+          });
         } else {
           this.currentBlock.y = nextY;
           this.renderCurrentBlock();
