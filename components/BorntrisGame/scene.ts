@@ -101,8 +101,6 @@ export default class BorntrisScene extends Phaser.Scene {
     this.createEmptyField();
     this.spawnNewBlock();
 
-    this.startDropLoop()
-
     this.input.keyboard?.on('keydown-LEFT', (event: KeyboardEvent) => {
       event.preventDefault();
       this.tryMove(-1, 0);
@@ -145,8 +143,10 @@ export default class BorntrisScene extends Phaser.Scene {
       this.dropEvent.remove(); // 기존 타이머 제거
     }
 
+    const delay = Math.max(100, 500 - Math.floor(this.score / 500) * 30)
+
     this.dropEvent = this.time.addEvent({
-      delay: 500,
+      delay: delay,
       loop: true,
       callback: this.dropBlock,
       callbackScope: this,
@@ -165,6 +165,8 @@ export default class BorntrisScene extends Phaser.Scene {
 
     this.currentBlock = {shape, x, y, color};
     this.renderCurrentBlock();
+
+    this.startDropLoop();
   }
 
   renderCurrentBlock() {
@@ -381,7 +383,6 @@ export default class BorntrisScene extends Phaser.Scene {
 
           this.time.delayedCall(200, () => {
             this.spawnNewBlock();
-            this.startDropLoop()
             this.isDropping = false;
           });
         } else {
