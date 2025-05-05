@@ -53,6 +53,8 @@ export default class BorntrisScene extends Phaser.Scene {
   private onScoreChange?: (score: number) => void;
 
   private isGameOver: boolean = false;
+  private isDropping: boolean = false;
+  private spacePressed: boolean = false;
 
   constructor() {
     super('BorntrisScene');
@@ -100,8 +102,15 @@ export default class BorntrisScene extends Phaser.Scene {
     });
 
     this.input.keyboard?.on('keydown-SPACE', (event: KeyboardEvent) => {
+      if (this.spacePressed) return;
+
       event.preventDefault();
+      this.spacePressed = true;
       this.hardDrop();
+    });
+
+    this.input.keyboard?.on('keyup-SPACE', () => {
+      this.spacePressed = false;
     });
   }
 
@@ -217,7 +226,7 @@ export default class BorntrisScene extends Phaser.Scene {
   }
 
   tryMove(dx: number, dy: number) {
-    if (!this.currentBlock) return;
+    if (!this.currentBlock || this.isDropping) return;
 
     const {shape, x, y} = this.currentBlock;
     const newX = x + dx;
@@ -231,7 +240,7 @@ export default class BorntrisScene extends Phaser.Scene {
   }
 
   tryRotate() {
-    if (!this.currentBlock) return;
+    if (!this.currentBlock || this.isDropping) return;
 
     const rotated = this.rotateMatrix(this.currentBlock.shape);
     const {x, y} = this.currentBlock;
@@ -294,18 +303,32 @@ export default class BorntrisScene extends Phaser.Scene {
   }
 
   hardDrop() {
-    if (!this.currentBlock) return;
+    if (!this.currentBlock || this.isDropping) return;
 
-    // 한 칸씩 내려가며 충돌 확인
-    while (!this.isColliding(this.currentBlock.shape, this.currentBlock.x, this.currentBlock.y + 1,
-    )) {
-      this.currentBlock.y++;
-    }
+    this.isDropping = true;
 
-    this.renderCurrentBlock();
+    const dropper = this.time.addEvent({
+      delay: 15,
+      loop: true,
+      callback: () => {
+        if (!this.currentBlock) {
+          this.isDropping = false;
+          dropper.remove();
+          return;
+        }
 
-    // 도달한 위치에 고정
-    this.fixCurrentBlock();
-    this.spawnNewBlock();
+        const nextY = this.currentBlock.y + 1;
+        if (this.isColliding(this.currentBlock.shape, this.currentBlock.x, nextY)) {
+          this.fixCurrentBlock();
+          this.spawnNewBlock();
+          this.isDropping = false;
+          dropper.remove();
+        } else {
+          this.currentBlock.y = nextY;
+          this.renderCurrentBlock();
+        }
+      },
+      callbackScope: this,
+    });
   }
 }
