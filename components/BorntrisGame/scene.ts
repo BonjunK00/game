@@ -248,6 +248,26 @@ export default class BorntrisScene extends Phaser.Scene {
     if (!this.isColliding(rotated, x, y)) {
       this.currentBlock.shape = rotated;
       this.renderCurrentBlock();
+      return;
+    }
+
+    // 💡 Wall Kick 시도
+    const kicks = [
+      [1, 0],   // 오른쪽 1칸
+      [-1, 0],  // 왼쪽 1칸
+      [0, -1],  // 위쪽 1칸
+      [1, -1],  // 오른쪽 위
+      [-1, -1], // 왼쪽 위
+    ];
+
+    for (const [dx, dy] of kicks) {
+      if (!this.isColliding(rotated, x + dx, y + dy)) {
+        this.currentBlock.shape = rotated;
+        this.currentBlock.x += dx;
+        this.currentBlock.y += dy;
+        this.renderCurrentBlock();
+        return;
+      }
     }
   }
 
