@@ -4,28 +4,61 @@ import {useEffect, useRef} from 'react';
 import Phaser from 'phaser';
 import BorntrisScene from './scene';
 
-export default function BorntrisGame() {
+export default function BorntrisGame(
+    {
+      onScoreChange,
+      restartSignal,
+      paused,
+      onRestartHandled,
+    }: {
+      onScoreChange?: (score: number) => void;
+      restartSignal?: boolean;
+      paused: boolean;
+      onRestartHandled?: () => void;
+    }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const gameRef = useRef<Phaser.Game | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const config: Phaser.Types.Core.GameConfig = {
+    const game = new Phaser.Game({
       type: Phaser.AUTO,
       width: 300,
       height: 600,
-      backgroundColor: '#1a1a1a',
       parent: containerRef.current,
-      scene: [BorntrisScene],
-      physics: {default: 'arcade'},
-    };
+      backgroundColor: '#1a1a1a',
+      scene: {
+        preload() {
+        },
+        create() {
+          this.scene.add('BorntrisScene', BorntrisScene, true, {
+            onScoreChange,
+          });
+        },
+      },
+    });
 
-    const game = new Phaser.Game(config);
+    gameRef.current = game;
 
-    return () => {
-      game.destroy(true);
-    };
+    return () => game.destroy(true);
   }, []);
 
-  return <div ref={containerRef}/>;
+  useEffect(() => {
+    if (!gameRef.current) return;
+    const scene = gameRef.current.scene.getScene('BorntrisScene');
+    if (scene) {
+      paused ? scene.scene.pause() : scene.scene.resume();
+    }
+  }, [paused]);
+
+  useEffect(() => {
+    if (restartSignal && gameRef.current) {
+      const scene = gameRef.current.scene.getScene('BorntrisScene');
+      scene.scene.restart({onScoreChange});
+      onRestartHandled?.();
+    }
+  }, [restartSignal]);
+
+  return <div ref={containerRef} className="w-[300px] h-[600px]"/>;
 }
